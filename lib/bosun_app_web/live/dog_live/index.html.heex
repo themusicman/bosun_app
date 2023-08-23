@@ -1,0 +1,41 @@
+<.header>
+  Listing Dogs
+  <:actions>
+    <.link patch={~p"/dogs/new"}>
+      <.button>New Dog</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="dogs"
+  rows={@streams.dogs}
+  row_click={fn {_id, dog} -> JS.navigate(~p"/dogs/#{dog}") end}
+>
+  <:col :let={{_id, dog}} label="Name"><%= dog.name %></:col>
+  <:action :let={{_id, dog}}>
+    <div class="sr-only">
+      <.link navigate={~p"/dogs/#{dog}"}>Show</.link>
+    </div>
+    <.link patch={~p"/dogs/#{dog}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, dog}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: dog.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="dog-modal" show on_cancel={JS.patch(~p"/dogs")}>
+  <.live_component
+    module={BosunAppWeb.DogLive.FormComponent}
+    id={@dog.id || :new}
+    title={@page_title}
+    action={@live_action}
+    dog={@dog}
+    patch={~p"/dogs"}
+  />
+</.modal>
